@@ -1,0 +1,17 @@
+site_name: Apache Kafka Streams Samples
+repo_url: https://github.com/jbcodeforce/kafka-streams-samples.git
+nav:
+  - Introduction: index.md
+  - Apache Kafka summary: https://ibm-cloud-architecture.github.io/refarch-eda/kafka/readme
+  - Consumer practices: https://ibm-cloud-architecture.github.io/refarch-eda/kafka/consumers
+  - Producer practices: https://ibm-cloud-architecture.github.io/refarch-eda/kafka/producers
+  - Kafka streaming notes: kstreams.md
+theme: 
+  name: material
+extra_css: ["extra.css"]
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
