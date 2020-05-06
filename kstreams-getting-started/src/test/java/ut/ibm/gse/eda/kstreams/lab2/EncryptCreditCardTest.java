@@ -27,7 +27,6 @@ import ibm.gse.eda.util.JSONSerde;
 public class EncryptCreditCardTest {
 
     private TopologyTestDriver testDriver;
-    private static String storeName = "transactionkey-store";
     private static String inTopicName = "transactions";
     private static String outTopicName = "output";
     private TestInputTopic<String, Purchase> inTopic;
@@ -35,7 +34,7 @@ public class EncryptCreditCardTest {
 
     public Properties getStreamsConfig() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "kstream-op1");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "kstream-gs-2");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummmy:1234");
         return props;
     }

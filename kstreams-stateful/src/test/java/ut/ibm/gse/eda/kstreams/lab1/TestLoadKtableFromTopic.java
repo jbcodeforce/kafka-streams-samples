@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TestInputTopic;
@@ -11,17 +12,21 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
+import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
- * This is a simple example of loading some reference data into a ktable for
- * lookup
+ * This is a simple example of loading some reference data from stream into a ktable for
+ * lookup. It uses persistent state store.
  */
 public class TestLoadKtableFromTopic {
     private static TopologyTestDriver testDriver;
@@ -39,25 +44,26 @@ public class TestLoadKtableFromTopic {
         return props;
     }
     
-    @BeforeClass
+    @BeforeAll
     public static void buildTopology(){
         final StreamsBuilder builder = new StreamsBuilder();
         // Adding a state store is a simple matter of creating a StoreSupplier 
         // instance with one of the static factory methods on the Stores class.
         // all persistent StateStore instances provide local storage using RocksDB
         KeyValueBytesStoreSupplier storeSupplier = Stores.persistentKeyValueStore(storeName);
-        StoreBuilder<KeyValueStore<String, String>> storeBuilder =
-                        Stores.keyValueStoreBuilder(storeSupplier,
-                                Serdes.String(),
-                                Serdes.String());
-        builder.addStateStore(storeBuilder);
-
+        
         KTable<String, String> productTypeTable = builder.table(productTypesTopic, 
-                Consumed.with(Serdes.String(), Serdes.String()));
+                Consumed.with(Serdes.String(), Serdes.String()),
+                Materialized.as(storeSupplier));
         
         testDriver = new TopologyTestDriver(builder.build(), getStreamsConfig());
         inTopic = testDriver.createInputTopic(productTypesTopic, new StringSerializer(), new StringSerializer());
             
+    }
+
+    @AfterAll
+    public static void close(){
+        testDriver.close();
     }
 
     @Test
@@ -68,7 +74,18 @@ public class TestLoadKtableFromTopic {
         inTopic.pipeInput("PT04","BoardGame");
         inTopic.pipeInput("PT05","Toy");
         inTopic.pipeInput("PT06","Disk");
-       // testDriver.getStateStore(name)
+        KeyValueStore<String,ValueAndTimestamp<String>> store = testDriver.getTimestampedKeyValueStore(storeName);
+        Assertions.assertNotNull(store);
+        ValueAndTimestamp<String> product = store.get("PT03");
+        Assertions.assertNotNull(product);
+        Assertions.assertEquals("Comic", product.value());
+
+        // demonstrate how to get all the values from the table:
+        KeyValueIterator<String, ValueAndTimestamp<String>> products = store.all();
+        while (products.hasNext()) {
+            KeyValue<String,ValueAndTimestamp<String>> p = products.next();
+            System.out.println(p.key + ":" + p.value.value());
+        }
         for ( StateStore s: testDriver.getAllStateStores().values()) {
             System.out.println(s.name());
         }

@@ -47,4 +47,6 @@ Specifying the replicas factor at the topic level, with a cluster of kafka broke
 
 ## Further readings
 
-* [Kafka Streams’ Take on Watermarks and Triggers](https://www.confluent.io/blog/kafka-streams-take-on-watermarks-and-triggers/) what continuous refinement with operational parameters means: 
+* [Kafka Streams’ Take on Watermarks and Triggers](https://www.confluent.io/blog/kafka-streams-take-on-watermarks-and-triggers/) what continuous refinement with operational parameters means
+
+* [Windowed aggregations over successively increasing timed windows](https://cwiki.apache.org/confluence/display/KAFKA/Windowed+aggregations+over+successively+increasing+timed+windows)
