@@ -14,10 +14,12 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KGroupedStream;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Window;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,8 @@ public class TestSendAlertForNotEnoughEvent {
     private static TestInputTopic<String, String> inTopic;
     private static TestOutputTopic<String, String> outTopic;
     private static Instant startTime;
+    private static StreamsBuilder builder;
+
 
     public static Properties getStreamsConfig() {
         final Properties props = new Properties();
@@ -54,29 +58,34 @@ public class TestSendAlertForNotEnoughEvent {
      * https://kafka.apache.org/21/documentation/streams/developer-guide/dsl-api.html#window-final-results
      */
     public static void buildTopology() {
-        final StreamsBuilder builder = new StreamsBuilder();
+        builder = new StreamsBuilder();
 
         KGroupedStream<String,String> groupedVessels =   builder.stream(
             inTopicName, 
             Consumed.with(Serdes.String(), Serdes.String())
         ).groupByKey();
-        groupedVessels
+
+        KTable<Windowed<String>,Long> vesselCount = groupedVessels
             // every one hour window with +10 mn grace period
             .windowedBy(TimeWindows.of(Duration.ofHours(1)).grace(Duration.ofMinutes(10)))
-            .count()
-            .suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded()))
+            .count();
+            
+            vesselCount.suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded()))
             .filter((windowedVesselId, count) -> count < 4)
             .toStream()
-            .foreach((windowedVesselId, count) -> sendAlert(windowedVesselId.window(), 
+            .foreach((windowedVesselId, count) -> sendAlert(vesselCount,windowedVesselId.window(), 
                                                     windowedVesselId.key(), count));
+            //.to(outTopicName, Produced.with(Serdes.String(), Serdes.String()));
         
         testDriver = new TopologyTestDriver(builder.build(), getStreamsConfig(),startTime);
         inTopic = testDriver.createInputTopic(inTopicName, new StringSerializer(), new StringSerializer());
         outTopic = testDriver.createOutputTopic(outTopicName, new StringDeserializer(), new StringDeserializer());
     }
 
-    public static void sendAlert(Window w, String k, Long count) {
-        
+    public static String sendAlert( KTable<Windowed<String>,Long> vesselCount,Window w, String k, Long count) {
+       String storeName = vesselCount.queryableStoreName();
+      // KeyValueStore<String,ValueAndTimestamp<String>> store = 
+       return "key: " + k + " count: " + Long.toString(count);
     }
 
     @Test 
