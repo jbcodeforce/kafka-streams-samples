@@ -1,5 +1,9 @@
 package ut.ibm.gse.eda.kstreams.lab2;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.Properties;
 
 import org.apache.kafka.common.serialization.Serdes;
@@ -14,9 +18,8 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Printed;
 import org.apache.kafka.streams.kstream.Produced;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ibm.gse.eda.domain.Purchase;
 import ibm.gse.eda.util.JSONSerde;
@@ -26,13 +29,13 @@ import ibm.gse.eda.util.JSONSerde;
  */
 public class EncryptCreditCardTest {
 
-    private TopologyTestDriver testDriver;
+    private static TopologyTestDriver testDriver;
     private static String inTopicName = "transactions";
     private static String outTopicName = "output";
-    private TestInputTopic<String, Purchase> inTopic;
-    private TestOutputTopic<String, Purchase> outTopic;
+    private static TestInputTopic<String, Purchase> inTopic;
+    private static TestOutputTopic<String, Purchase> outTopic;
 
-    public Properties getStreamsConfig() {
+    public static Properties getStreamsConfig() {
         final Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "kstream-gs-2");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummmy:1234");
@@ -40,8 +43,8 @@ public class EncryptCreditCardTest {
     }
 
 
-    @Before
-    public void buildTopology(){
+    @BeforeAll
+    public static void buildTopology(){
         final StreamsBuilder builder = new StreamsBuilder();
         
         KStream<String,Purchase> purchaseStream = builder.stream(inTopicName, Consumed.with(Serdes.String(),
@@ -64,7 +67,8 @@ public class EncryptCreditCardTest {
         p.setCreditCardNumber("1234-3456789012");
         
         inTopic.pipeInput(p.getCustomerId(),p);
-        Assert.assertTrue( ! outTopic.isEmpty()); 
-        Assert.assertTrue("xxxx".equals(outTopic.readKeyValue().value.getCreditCardNumber()));
+        assertThat(outTopic.isEmpty(), is(false));
+        assertThat(outTopic.readValue().getCreditCardNumber(),equalTo("xxxx"));
+
     }
 }

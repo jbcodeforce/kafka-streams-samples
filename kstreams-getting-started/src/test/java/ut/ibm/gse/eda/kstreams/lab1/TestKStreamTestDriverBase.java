@@ -23,9 +23,9 @@ import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TestKStreamTestDriverBase {
     private TopologyTestDriver testDriver;
@@ -47,7 +47,7 @@ public class TestKStreamTestDriverBase {
         return props;
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         final StreamsBuilder builder = new StreamsBuilder();
         //Create Actual Stream Processing pipeline
@@ -61,7 +61,7 @@ public class TestKStreamTestDriverBase {
     }
 
 
-    @After
+    @AfterEach
     public void tearDown() {
         try {
             testDriver.close();

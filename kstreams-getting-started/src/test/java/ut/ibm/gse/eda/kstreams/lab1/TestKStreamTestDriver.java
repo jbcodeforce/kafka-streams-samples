@@ -23,9 +23,9 @@ import org.apache.kafka.streams.processor.PunctuationType;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.Stores;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * This example is to get an understanding of the TopologyTestDriver API and usage,
@@ -41,7 +41,7 @@ public class TestKStreamTestDriver {
     private Serde<String> stringSerde = new Serdes.StringSerde();
     private Serde<Long> longSerde = new Serdes.LongSerde();
    
-    @Before
+    @BeforeEach
     public void setup() {
         Topology topology = new Topology();
         topology.addSource("sourceProcessor", "input-topic");
@@ -69,7 +69,7 @@ public class TestKStreamTestDriver {
         store.put("a", 21L);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         testDriver.close();
     }
