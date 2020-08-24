@@ -2,11 +2,11 @@
 
 This repository regroups a set of personal studies and quick summary on Kafka Streams.
 
-Updated date 5/9/2020
+Updated date 8/21/2020
 
 ## Run Kafka 2.5 locally for development
 
-The docker compose file, under `local-cluster` starts one zookeeper and two kafka brokers locally on the `kafkanet` network.
+The docker compose file, under `local-cluster` starts one zookeeper and two kafka brokers locally on the `kafkanet` network: `docker-compose up &`
 
 To start `kafkacat` using the debezium tooling do the following:
 
@@ -14,8 +14,7 @@ To start `kafkacat` using the debezium tooling do the following:
 docker run --tty --rm -i --network kafkanet debezium/tooling:latest
 ```
 
-If you run with Event Streams on Cloud set the KAFKA_BROKERS and KAFKA_APIKEY environment variables accordingly.
-
+If you run with Event Streams on Cloud set the KAFKA_BROKERS and KAFKA_USER and KAFKA_PWD environment variables accordingly (token and apikey) if you run on premise add the KAFKA_.
 
 ## Projects
 
@@ -31,13 +30,13 @@ Streams topology could be tested outside of Kafka run time environment using the
 * a kafka streams topology or pipeline to test
 * a set of tests to define data to send to input topic and assertions on the expected results coming from the output topic.
 
-#### Understand topology test driver
+#### Understanding the topology test driver
 
 The **Lab 1** proposes to go over how to use TopologyTestDriver class: [base class](https://github.com/jbcodeforce/kafka-streams-samples/blob/master/kstreams-getting-started/src/test/java/ut/ibm/gse/eda/kstreams/lab1/TestKStreamTestDriverBase.java) and a second [more complex usage](https://github.com/jbcodeforce/kafka-streams-samples/blob/master/kstreams-getting-started/src/test/java/ut/ibm/gse/eda/kstreams/lab1/TestKStreamTestDriver.java) with clock wall and advance time to produce event with controlled time stamps
 
 #### Transforming data
 
-The common data transformation use cases can be easily  done with Kafka streams. The **lab2**: [sample](https://github.com/jbcodeforce/kafka-streams-samples/blob/master/kstreams-getting-started/src/test/java/ut/ibm/gse/eda/kstreams/lab2/EncryptCreditCardTest.java) is presenting how to encrypt an attribute of the record payload. 
+The common data transformation use cases can be easily  done with Kafka streams. The **lab2**: [sample](https://github.com/jbcodeforce/kafka-streams-samples/blob/master/kstreams-getting-started/src/test/java/ut/ibm/gse/eda/kstreams/lab2/EncryptCreditCardTest.java) is presenting how to encrypt an attribute from the input record. 
 
 #### The integration test
 
