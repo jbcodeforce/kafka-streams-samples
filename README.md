@@ -2,11 +2,11 @@
 
 This repository regroups a set of personal studies and quick summary on Kafka Streams.
 
-Updated date 8/21/2020
+Updated date 9/17/2020
 
 ## Run Kafka 2.5 locally for development
 
-The docker compose file, under `local-cluster` starts one zookeeper and two kafka brokers locally on the `kafkanet` network: `docker-compose up &`
+The docker compose file, under `local-cluster` starts one zookeeper and two Kafka brokers locally on the `kafkanet` network: `docker-compose up &`
 
 To start `kafkacat` using the debezium tooling do the following:
 
@@ -14,11 +14,11 @@ To start `kafkacat` using the debezium tooling do the following:
 docker run --tty --rm -i --network kafkanet debezium/tooling:latest
 ```
 
-If you run with Event Streams on Cloud set the KAFKA_BROKERS and KAFKA_USER and KAFKA_PWD environment variables accordingly (token and apikey) if you run on premise add the KAFKA_.
+If you run with Event Streams on IBM Cloud set the KAFKA_BROKERS and KAFKA_USER and KAFKA_PWD environment variables accordingly (token and apikey) if you run on premise add the KAFKA_.
 
 ## Projects
 
-Most of the Kafka streams examples are implemented as unit tests. So `mvn test` will run all of them.
+Most of the Kafka streams examples in this repository are implemented as unit tests. So `mvn test` will run all of them.
 
 ### Getting started
 
@@ -27,7 +27,7 @@ The following samples are defined under the [kstreams-getting-started](https://g
 Streams topology could be tested outside of Kafka run time environment using the [TopologyTestDriver](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/TopologyTestDriver.html). Each test defines the following elements:
 
 * a simple configuration for the test driver, with input and output topics
-* a kafka streams topology or pipeline to test
+* a Kafka streams topology or pipeline to test
 * a set of tests to define data to send to input topic and assertions on the expected results coming from the output topic.
 
 #### Understanding the topology test driver
@@ -40,7 +40,7 @@ The common data transformation use cases can be easily  done with Kafka streams.
 
 #### The integration test
 
-`debezium` has a tool to run an Embedded kafka. The **lab3**: TO COMPLETE: use an embedded kafka to do tests
+`debezium` has a tool to run an Embedded kafka. The **lab3**: TO COMPLETE: use an embedded kafka to do tests and not the TopologyTestDriver, so it runs with QuarkusTest
 
 
 *This project was created with `mvn io.quarkus:quarkus-maven-plugin:1.4.2.Final:create \
@@ -63,26 +63,27 @@ The test folders includes a set of stateful test cases
 
 #### Joining 3 streams with reference data to build a document
 
-This is a simple example of joining 3 sources of kafka streams to build a merged document, with some reference data loaded from a topic:
+This demonstration highlights how to join 3 streams into one to support use cases like:
 
-* The shipment status is a reference table and loaded inside a kafka topic: shipment-status
-* The order includes items and customer id reference
-* Customer is about the customer profile
-* Products is about products inventory. 
-* The outcome is an order report document that merge most of the attributes of the 3 streams.
+* data enrichement from reference data
+* data transformation by merging data
+
+This represents a classical use case of data pipeline with CDC generating events from three different tables:
+
+- products reference data: new products are rarely added: one every quarter.
+- shipments: includes static information on where to ship the ordered products
+- shipmentReferences: includes detailed about the shipment routes, legs and costs 
+
+and the goal is to build a shipmentEnriched object to be send to a data lake for at rest analytics. The report document that merge most of the attributes of the 3 streams.
+
+This process is done in batch mode, but moving to a CDC -> streams -> data lake pipeline brings a lot of visibility to the shipment process and help to have a real time view of aggregated object, that can be used by new event driven services.
 
 ### Kafka with Quarkus reactive messaging
 
-The folder [quarkus-reactive-msg](https://github.com/jbcodeforce/kafka-streams-samples/tree/master/quarkus-reactive-msg) is a fork of the Quarkus guide for [using Kafka Streams](https://quarkus.io/guides/kafka-streams).
+The [Quarkus Kafka Streams guide](https://quarkus.io/guides/kafka-streams) has an interesting example of:
 
-Run ` ./mvnw compile quarkus:dev` to start local quarkus app and continuously develop on top of it.
-
-To generate the starting code for the **producer** we use the quarkus maven plugin with kafka extension:
-`mvn io.quarkus:quarkus-maven-plugin:1.4.1.Final:create -DprojectGroupId=jbcodeforce.kafka.study -DprojectArtifactId=producer -Dextensions="kafka"`
-
-for the **aggregator**:
-
-`mvn io.quarkus:quarkus-maven-plugin:1.4.1.Final:create -DprojectGroupId=jbcodeforce.kafka.study -DprojectArtifactId=aggregator -Dextensions="kafka-streams,resteasy-jsonb"`
+* A producer to create event from a list using Flowable API, in a reactive way.
+* A Streaming processing to aggregate value with KTable, state store and interactive queries
 
 The producer code has an interesting way to generate reference values to a topic with microprofile reactive messaging: `stations` is a hash mpa, and using [java.util.collection.stream()](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html#stream--) to create a stream from the elements of a collection, and then use the [Java Stream API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) to support the development of streaming pipelines: a operation chains to apply on the source of the stream. In the example below the collection of stations becomes a stream on which each record is transformed to a Kafka record, which are then regrouped in a list. The Flowable class is part of the [reactive messaging api](http://reactivex.io/) and supports asynchronous processing which combined with the @Outgoing annotation, produces messages to a kafka topic.
 
@@ -100,7 +101,7 @@ The producer code has an interesting way to generate reference values to a topic
     };
 ```
 
-Channels are mapped to Kafka topics using the Quarkus configuration file `application.properties`.
+Channels are mapped to Kafka topics using the `application.properties` Quarkus configuration file.
 
 The stream processing is in the aggregator class. But what is interesting also in this example is the use of `interactive queries` to access the underlying state store using a given key. The query can be exposed via a REST end point.
 
@@ -144,9 +145,7 @@ export QUARKUS_MODE=native
 
 ### Fault tolerance and scaling out
 
-The load and state can be distributed amongst multiple application instances running the same pipeline. Each node will then contain a subset of the aggregation results, but Kafka Streams provides you with an API to obtain the information which node is hosting a given key. 
-
-The following diagrams il
+The load and state can be distributed amongst multiple application instances running the same pipeline. Each node will then contain a subset of the aggregation results, but Kafka Streams provides you with an API to obtain the information which node is hosting a given key.
 
 The application can then either fetch the data directly from the other instance, or simply point the client to the location of that other node.
 
@@ -200,10 +199,6 @@ Adding the health dependency in the pom.xml:
 and then a [simple health class]()
 
 We can see quarkus-kafka-streams will automatically add, a readiness health check to validate that all topics declared in the quarkus.kafka-streams.topics property are created, and a liveness health check based on the Kafka Streams state.
-
-### Fraud detection with quarkus reactive messaging
-
-The application itself is a web app, to do some fraud detection sample using Quarkus and reactive messaging on top of kafka topics.
 
 
 ## Further readings

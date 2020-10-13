@@ -5,5 +5,3 @@ site/
 kstreams-stateful/target/
 kstreams-stateful/.mvn/
 kstreams-getting-started/target/
-quarkus-reactive-msg/producer/target/
-quarkus-reactive-msg/aggregator/target/
