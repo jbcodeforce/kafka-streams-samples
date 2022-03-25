@@ -3,13 +3,16 @@ package ut.ibm.gse.eda.kstreams.lab3;
 import org.apache.kafka.streams.Topology;
 
 /**
- * This demonstration highlights how to merge 3 streams into one to do: - data
- * enrichement from reference data - data transformation by merging data
+ * This demonstration highlights how to merge 3 streams into one to do: 
+ * 
+ * - data enrichement from reference data 
+ * - data transformation by merging data
  * 
  * This represents a classical use case of data pipeline with CDC generating
- * events from three different tables: - products - shipments: includes static
- * information on where to ship the ordered product - shipmentReferences:
- * includes detailed about the shipment routes, legs and costs
+ * events from three different tables: 
+ * - products 
+ * - shipments: includes staticninformation on where to ship the ordered product 
+ * - shipmentReferences: includes detailed about the shipment routes, legs and costs
  * 
  * and the goal is to build a shipmentEnriched object to be send to a data lake
  * for at rest analytics.

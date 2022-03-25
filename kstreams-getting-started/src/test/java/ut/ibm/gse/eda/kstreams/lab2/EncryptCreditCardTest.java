@@ -21,8 +21,8 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ibm.gse.eda.domain.Purchase;
-import ibm.gse.eda.util.JSONSerde;
+import ibm.gse.eda.kstream.domain.Purchase;
+import ibm.gse.eda.kstream.infra.events.PurchaseSerdes;
 
 /**
  * 
@@ -48,16 +48,16 @@ public class EncryptCreditCardTest {
         final StreamsBuilder builder = new StreamsBuilder();
         
         KStream<String,Purchase> purchaseStream = builder.stream(inTopicName, Consumed.with(Serdes.String(),
-            new JSONSerde<Purchase>()))
+        PurchaseSerdes.PurchaseSerde()))
             .mapValues(p -> Purchase.builder(p).maskCreditCard().build());
 
         purchaseStream.print(Printed.<String, Purchase>toSysOut().withLabel("encryptedPurchase"));
 
-        purchaseStream.to(outTopicName, Produced.with(Serdes.String(), new JSONSerde<Purchase>()));
+        purchaseStream.to(outTopicName, Produced.with(Serdes.String(), PurchaseSerdes.PurchaseSerde()));
 
         testDriver = new TopologyTestDriver(builder.build(), getStreamsConfig());
-        inTopic = testDriver.createInputTopic(inTopicName, new StringSerializer(), new JSONSerde<Purchase>());
-        outTopic = testDriver.createOutputTopic(outTopicName,new StringDeserializer(), new JSONSerde<Purchase>());
+        inTopic = testDriver.createInputTopic(inTopicName, new StringSerializer(), PurchaseSerdes.PurchaseSerde().serializer());
+        outTopic = testDriver.createOutputTopic(outTopicName,new StringDeserializer(), PurchaseSerdes.PurchaseSerde().deserializer());
     }
 
     @Test

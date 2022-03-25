@@ -1,14 +1,14 @@
-package ibm.gse.eda.domain;
+package ibm.gse.eda.kstream.domain;
 
 import java.util.Date;
 import java.util.Objects;
 
-import ibm.gse.eda.util.JSONSerdeCompatible;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-public class Purchase implements JSONSerdeCompatible  {
-
-    private String customerId;
-    private String creditCardNumber;
+@RegisterForReflection
+public class Purchase {
+    String customerId;
+    String creditCardNumber;
     private String itemPurchased;
     private int quantity;
     private double price;
@@ -26,11 +26,11 @@ public class Purchase implements JSONSerdeCompatible  {
         zipCode = builder.zipCode;
         creationTime = builder.creationTime;
     }
-
+    
     public Purchase() {
-	}
+    }
 
-	public static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -59,61 +59,23 @@ public class Purchase implements JSONSerdeCompatible  {
     }
 
     public String getCustomerId() {
-        return this.customerId;
+        return customerId;
     }
+
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
     }
 
+
     public String getCreditCardNumber() {
-        return this.creditCardNumber;
+        return creditCardNumber;
     }
+
 
     public void setCreditCardNumber(String creditCardNumber) {
         this.creditCardNumber = creditCardNumber;
     }
-
-    public String getItemPurchased() {
-        return this.itemPurchased;
-    }
-
-    public void setItemPurchased(String itemPurchased) {
-        this.itemPurchased = itemPurchased;
-    }
-
-    public int getQuantity() {
-        return this.quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getPrice() {
-        return this.price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public Date getPurchaseDate() {
-        return this.purchaseDate;
-    }
-
-    public void setPurchaseDate(Date purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public String getZipCode() {
-        return this.zipCode;
-    }
-
-    public void setZipCode(String zip) {
-        this.zipCode = zip;
-    }
-    
 
 
     public static final class Builder {
@@ -159,4 +121,45 @@ public class Purchase implements JSONSerdeCompatible  {
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
     }
+
+    public String getItemPurchased() {
+        return this.itemPurchased;
+    }
+
+    public void setItemPurchased(String itemPurchased) {
+        this.itemPurchased = itemPurchased;
+    }
+
+    public int getQuantity() {
+        return this.quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getPrice() {
+        return this.price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Date getPurchaseDate() {
+        return this.purchaseDate;
+    }
+
+    public void setPurchaseDate(Date purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public String getZipCode() {
+        return this.zipCode;
+    }
+
+    public void setZipCode(String zip) {
+        this.zipCode = zip;
+    }
+
 }

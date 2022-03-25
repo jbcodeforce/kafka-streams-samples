@@ -2,19 +2,15 @@
 
 This repository regroups a set of personal studies and quick summary on Kafka Streams.
 
-Updated date 9/17/2020
+UPDATED 03/24/2022  - Strimzi 3.1 - Quarkus 2.7.4
 
-## Run Kafka 2.5 locally for development
+See other notes in the [BOOK format](https://jbcodeforce.github.io/kafka-studies/) for knowledge sharing.
 
-The docker compose file, under `local-cluster` starts one zookeeper and two Kafka brokers locally on the `kafkanet` network: `docker-compose up &`
+Most of the project use quarkus 2.7.x and TestDriver or quarkus dev mode with redpanda. But if needed a docker compose run strimzi quay.io/strimzi/kafka:latest-kafka-3.1.0
 
-To start `kafkacat` using the debezium tooling do the following:
+## Run Kafka 3.1 locally for development
 
-```shell
-docker run --tty --rm -i --network kafkanet debezium/tooling:latest
-```
-
-If you run with Event Streams on IBM Cloud set the KAFKA_BROKERS and KAFKA_USER and KAFKA_PWD environment variables accordingly (token and apikey) if you run on premise add the KAFKA_.
+The docker compose file, under `local-cluster` starts one zookeeper and two Kafka brokers locally: `docker-compose up -d`
 
 ## Projects
 
